@@ -211,13 +211,9 @@ int main(){
 
 	load_xell_conf();
 
-	ip_addr_t fallback_address;
-	ip4_addr_set_u32(&fallback_address, 0xC0A8015A); // 192.168.1.90
-
 	printf("\n * Looking for files on TFTP...\n\n");
 	for(;;){
 		tftp_loop(boot_server_name()); //less likely to find something...
-		tftp_loop(fallback_address);
 		fileloop();
 		
 		console_clrline();
