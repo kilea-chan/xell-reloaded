@@ -2,6 +2,11 @@
 used for zlib support ...
 */
 
+#ifndef FILE_H
+#define FILE_H
+
+#include <lwip/ip_addr.h>
+
 enum {
     TYPE_INVALID,
     TYPE_ELF,
@@ -23,5 +28,7 @@ void wait_and_cleanup_line();
 int launch_file(void * addr, unsigned len, int filetype);
 int try_load_file(char *filename, int filetype);
 void fileloop();
-void tftp_loop();
+void tftp_loop(ip_addr_t server);
 void load_xell_conf();
+
+#endif
