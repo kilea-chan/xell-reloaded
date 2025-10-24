@@ -28,6 +28,7 @@ see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 #include "tftp/tftp.h"
 #include "kbootconf.h"
 #include "file.h"
+#include "utils/util.h"
 
 int boot_entry;
 char conf_buf[MAX_KBOOTCONF_SIZE];
@@ -40,34 +41,6 @@ enum ir_remote_codes IR;
 static struct controller_data_s ctrl;
 static struct controller_data_s old_ctrl;
 
-/* network.h */
-extern struct netif netif;
-
-char *strip(char *buf)
-{
-	while (*buf == ' ' || *buf == '\t')
-		buf++;
-	char *end = buf + strlen(buf) - 1;
-	while (*end == ' ' || *end == '\t')
-		*end-- = 0;
-
-	return buf;
-}
-
-void split(char *buf, char **left, char **right, char delim)
-{
-	char *p = strchr(buf, delim);
-
-	if (p) {
-		*p = 0;
-		*left = strip(buf);
-		*right = strip(p+1);
-	} else {
-		*left = strip(buf);
-		*right = NULL;
-	}
-}
-
 int kboot_loadfile(char *filename, int type)
 {
 	int ret;
@@ -78,61 +51,6 @@ int kboot_loadfile(char *filename, int type)
 		ret = boot_tftp(boot_server_name(),filename,type);
 		
 	return ret;
-}
-
-void kboot_set_config(void)
-{
-        
-        int setnetconfig = 0;
-        static int oldvideomode = -1;
-        ip_addr_t ipaddr, netmask, gateway, tftpserver;
-        
-	if(conf.tftp_server != NULL)
-		if (ipaddr_aton(conf.tftp_server,&tftpserver))
-			kboot_tftp = conf.tftp_server;
-
-        /* Only reinit network if IPs dont match which got set by kboot on previous try*/
-	if(conf.ipaddress != NULL)
-        	if (ipaddr_aton(conf.ipaddress,&ipaddr) && ip_addr_cmp(&oldipaddr,&ipaddr) == 0)
-        	{
-        	        printf(" * taking network down to set config values\n");
-        	        setnetconfig = 1;
-        	        netif_set_down(&netif);
-                
-        	        netif_set_ipaddr(&netif,&ipaddr);
-        	        ip_addr_set(&oldipaddr,&ipaddr);
-        	}
-
-	if(conf.netmask != NULL)
-        	if (ipaddr_aton(conf.netmask,&netmask) && setnetconfig){
-        	        netif_set_netmask(&netif,&netmask);
-        	        ip_addr_set(&oldnetmask,&netmask);
-        	}
-        
-	if(conf.gateway != NULL)
-        	if (ipaddr_aton(conf.gateway,&gateway) && setnetconfig){
-        	        netif_set_gw(&netif,&gateway);
-        	        ip_addr_set(&oldgateway,&gateway); 
-        	}
-        
-        if (setnetconfig){
-           printf(" * bringing network back up...\n");
-           netif_set_up(&netif);
-           network_print_config();
-        }
-        
-        if(conf.videomode > VIDEO_MODE_AUTO && conf.videomode <= VIDEO_MODE_NTSC && oldvideomode != conf.videomode){
-            oldvideomode = conf.videomode;
-            xenos_init(conf.videomode);
-	    console_init();
-            printf(" * Xenos re-initalized\n");
-        }
-	
-	if(conf.speedup >= XENON_SPEED_FULL && conf.speedup <= XENON_SPEED_1_3){ //speedmode: drivers/xenon_soc/xenon_power.h
-		printf("Speeding up CPU\n");
-		xenon_make_it_faster(conf.speedup);
-	}
-        
 }
 
 int kbootconf_parse(void)
@@ -149,8 +67,6 @@ int kbootconf_parse(void)
 	memset(&conf, 0, sizeof(conf));
 
 	conf.timeout = -1;
-        conf.videomode = -1;
-	conf.speedup = 0;
 
 	while(*lp) {
 		char *newline = strchr(lp, '\n');
@@ -191,19 +107,7 @@ int kbootconf_parse(void)
 			dinitrd = right;
 		} else if (!strcmp(left, "root")) {
 			droot = right;
-		} else if (!strcmp(left, "videomode")) {
-			conf.videomode = atoi(right);
-		} else if (!strcmp(left, "speedup")) {
-			conf.speedup = atoi(right);
-                } else if (!strcmp(left, "tftp_server")) {
-			conf.tftp_server = right;
-                } else if (!strcmp(left, "ip")) {
-			conf.ipaddress = right;
-                } else if (!strcmp(left, "netmask")) {
-			conf.netmask = right;
-                } else if (!strcmp(left, "gateway")) {
-			conf.gateway = right;
-                } else if (!strncmp(left, "#", 1)||!strncmp(left, ";", 1)) {
+		} else if (!strncmp(left, "#", 1)||!strncmp(left, ";", 1)) {
 			goto nextline;
 		} else {
 			if (strlen(right) > MAX_CMDLINE_SIZE) {
@@ -454,7 +358,6 @@ int try_kbootconf(void * addr, unsigned len){
     conf_buf[len] = 0; //ensure null-termination
     
     kbootconf_parse();
-    kboot_set_config();
     
     if (conf.num_kernels == 0){
        PRINT_WARN("No kernels found in kboot.conf !\n");
@@ -502,7 +405,6 @@ int try_kbootconf(void * addr, unsigned len){
     conf.num_kernels = 0;
     conf.timeout = 0;
     conf.default_idx = 0;
-    conf.speedup = 0;
     
     return ret;
 }

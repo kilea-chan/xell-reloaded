@@ -17,7 +17,7 @@ include $(DEVKITXENON)/rules
 #---------------------------------------------------------------------------------
 TARGET		:=	stage2
 BUILD		:=	build
-SOURCES		:=	source/lv2 source/lv2/tftp source/lv2/httpd source/lv2/linux source/lv2/kboot source/lv1/puff
+SOURCES		:=	source/lv2 source/lv2/tftp source/lv2/httpd source/lv2/linux source/lv2/utils source/lv2/kboot source/lv2/xell source/lv1/puff
 DATA		:=	data
 INCLUDES	:=	source/lv2
 

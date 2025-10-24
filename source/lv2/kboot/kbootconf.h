@@ -24,13 +24,7 @@ struct kbootkernel {
 
 struct kbootconf {
 	int timeout;
-        int videomode;
-	int speedup;
 	char *msgfile;
-        char *tftp_server;
-        char *ipaddress;
-        char *netmask;
-        char *gateway;
 	int default_idx;
 	int num_kernels;
 	struct kbootkernel kernels[MAX_KERNELS];

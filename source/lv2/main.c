@@ -208,6 +208,9 @@ int main(){
 	//}
 	
 	// mount_all_devices();
+
+	load_xell_conf();
+
 	ip_addr_t fallback_address;
 	ip4_addr_set_u32(&fallback_address, 0xC0A8015A); // 192.168.1.90
 

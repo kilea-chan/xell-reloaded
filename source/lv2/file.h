@@ -8,7 +8,8 @@ enum {
     TYPE_INITRD,
     TYPE_KBOOT,
     TYPE_NANDIMAGE,
-    TYPE_UPDXELL
+    TYPE_UPDXELL,
+    TYPE_XELLCONF
 };
 
 
@@ -23,3 +24,4 @@ int launch_file(void * addr, unsigned len, int filetype);
 int try_load_file(char *filename, int filetype);
 void fileloop();
 void tftp_loop();
+void load_xell_conf();

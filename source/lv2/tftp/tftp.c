@@ -55,7 +55,7 @@ typedef struct {
   uint32_t block_size;
 } tftp_state_t;
 
-extern char *kboot_tftp;
+extern char *xellconf_tftp;
 extern void console_clrline();
 
 int send_ack(struct udp_pcb *pcb, ip_addr_t server_addr, uint16_t port, uint32_t block) {
@@ -446,7 +446,7 @@ extern int boot_tftp_url(const char *url) {
 
 ip_addr_t boot_server_name() {
   ip_addr_t ret;
-  if (kboot_tftp && kboot_tftp[0] && ipaddr_aton(kboot_tftp, &ret)) {
+  if (xellconf_tftp && xellconf_tftp[0] && ipaddr_aton(xellconf_tftp, &ret)) {
     return ret;
   }
 

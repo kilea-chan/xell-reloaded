@@ -23,6 +23,7 @@ used for zlib support ...
 #include "config.h"
 #include "file.h"
 #include "kboot/kbootconf.h"
+#include "xell/xellconf.h"
 #include "tftp/tftp.h"
 
 #define GZIP_HEADER_SIZE 10
@@ -90,6 +91,10 @@ int launch_file(void *addr, unsigned len, int filetype) {
     printf(" * Loading kboot.conf ...\n");
     ret = try_kbootconf(addr, len);
     break;
+  case TYPE_XELLCONF:
+    printf(" * Loading xell.conf ...\n");
+    ret = try_xellconf(addr, len);
+    break;
   // This shit is broken!
   //     case TYPE_UPDXELL:
    //if (memcmp(addr + XELL_FOOTER_OFFSET, XELL_FOOTER, XELL_FOOTER_LENGTH) ||
@@ -156,6 +161,22 @@ int try_load_file(char *filename, int filetype) {
   fclose(f);
   free(buf);
   return ret;
+}
+
+void load_xell_conf() {
+  char filepath[255];
+
+  int i = 0;
+  for (i = 3; i < 16; i++) {
+    if (devoptab_list[i]->structSize) {
+        usb_do_poll();
+        if (!devoptab_list[i]->structSize)
+          break;
+        sprintf(filepath, "%s:/%s", devoptab_list[i]->name,
+                "xell.conf");
+            try_load_file(filepath, TYPE_XELLCONF);
+    }
+  }
 }
 
 void fileloop() {
