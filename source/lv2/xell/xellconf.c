@@ -98,8 +98,10 @@ void xell_set_config(void)
     ip_addr_t ipaddr, netmask, gateway, tftpserver;
 
     if(conf.tftp_server != NULL)
-        if (ipaddr_aton(conf.tftp_server,&tftpserver))
-            xellconf_tftp = conf.tftp_server;
+        if (ipaddr_aton(conf.tftp_server,&tftpserver)) {
+            xellconf_tftp = malloc(strlen(conf.tftp_server) + 1);
+            strcpy(xellconf_tftp, conf.tftp_server);
+        }
 
     if(conf.ipaddress != NULL)
         if (ipaddr_aton(conf.ipaddress,&ipaddr) && ip_addr_cmp(&oldipaddr,&ipaddr) == 0)

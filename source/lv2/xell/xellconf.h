@@ -15,4 +15,6 @@ struct xellconf {
 int xellconf_parse(void);
 int try_xellconf(void * addr, unsigned len);
 
+extern char *xellconf_tftp;
+
 #endif

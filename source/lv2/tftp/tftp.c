@@ -16,6 +16,7 @@
 
 #include "config.h"
 #include "file.h"
+#include "../xell/xellconf.h"
 #include <elf/elf.h>
 #include <network/network.h>
 #include <ppc/timebase.h>
@@ -55,7 +56,6 @@ typedef struct {
   uint32_t block_size;
 } tftp_state_t;
 
-extern char *xellconf_tftp;
 extern void console_clrline();
 
 int send_ack(struct udp_pcb *pcb, ip_addr_t server_addr, uint16_t port, uint32_t block) {
